@@ -1,0 +1,24 @@
+set :user, "root"
+
+task :web_server do
+  set :url, "chef-www.fluffbox.info"
+
+  role :server, "#{url}"
+end
+
+task :db_server do
+  set :url, "chefdb.fluffbox.info"
+
+  role :server, "#{url}"
+end
+
+task :setup_key, roles => :server do  
+  run "mkdir -p ~/.ssh"
+  upload("/Users/mstine/.ssh/id_rsa.pub", "/root/.ssh/authorized_keys", :via => :scp)
+end
+
+task :chef_run, roles => :server do
+  ssh_options[:keys] = [File.join(ENV["HOME"], ".ssh", "id_rsa")]
+  
+  run "chef-client"
+end
